@@ -12,6 +12,8 @@
   function nMonths(a, b) { if (!/^\d{4}-\d{2}$/.test(a || '')) return 0; b = /^\d{4}-\d{2}$/.test(b || '') && b >= a ? b : a; return (+b.slice(0, 4) - +a.slice(0, 4)) * 12 + (+b.slice(5, 7) - +a.slice(5, 7)) + 1; }
   function sums(d) {
     var o = { fees: 0 };
+    /* a business not registered under GST charges none: that is the start, until the user picks another line (round C) */
+    if (!d.gstSet && d.seller && d.seller.reg === 'unreg' && d.gst === 'ex') d.gst = 'none';
     d.lines.forEach(function (l) { o.fees += num(l.amt); });
     o.fees = r2(o.fees); o.conc = r2(num(d.conc)); o.prev = r2(num(d.prev));
     o.due = r2(o.fees - o.conc + o.prev);
@@ -52,13 +54,14 @@
     name: function () { return 'Fee Receipt'; },
     blank: function () { var m = ym(NS.today()); return { cls: '', sec: '', roll: '', guardian: '', session: '', mFrom: m, mTo: m, lines: [line('Tuition fee')], conc: '', prev: '', paid: '', mode: 'cash', ref: '', gst: 'ex', incl: true, balance: 0 }; },
     newRow: function () { return line(); },
+    input: function (p, el, d) { if (p === 'gst') d.gstSet = true; },
     keepOnNew: function (d) { return { affil: d.affil, gst: d.gst, incl: d.incl, paper: d.paper, session: d.session, mFrom: d.mFrom, mTo: d.mTo, lines: d.lines.map(function (l) { return line(l.desc, l.amt); }) }; },
     party: 'customer',
     form: function (K) {
       return K.card(t('fe.lgstu'), '<div class="fg">' +
           K.f('buyer.name', t('fe.student'), { wide: true, hint: t('fe.stuh') }) + K.f('guardian', t('fe.guard')) + K.f('buyer.phone', t('l.phone'), { type: 'tel', mode: 'tel', ltr: 1 }) +
           K.f('cls', t('fe.cls')) + K.f('sec', t('fe.sec')) + K.f('roll', t('fe.roll'), { ltr: 1 }) + K.f('session', t('fe.session'), { ph: '2026-27', ltr: 1 }) + '</div>') +
-        K.numCard(K.f('mFrom', t('fe.from'), { type: 'month' }) + K.f('mTo', t('fe.to'), { type: 'month' })) +
+        K.numCard(K.f('mFrom', t('fe.from'), { type: 'month' }) + K.f('mTo', t('fe.to'), { type: 'month', hint: t('fe.toh') })) +
         K.card(t('fe.lgfees'), K.list('lines', t('fe.addhead')) + '<div class="fg">' +
           K.f('conc', t('fe.conc'), { mode: 'decimal', ltr: 1 }) + K.f('prev', t('fe.prev'), { mode: 'decimal', ltr: 1 }) +
           K.f('gst', t('fe.gst'), { type: 'select', wide: true, opts: [['ex', t('fe.gex')], ['18', t('fe.g18')], ['none', t('fe.gnone')]], hint: t('fe.gsth') }) + K.f('incl', t('fe.incl'), { type: 'check', show: 'gst=18' }) +
@@ -76,7 +79,7 @@
     sums: sums,
     edSums: function (d, o) {
       return '<span>' + esc(t('fe.s.fees', { v: NS.money(o.fees), n: o.months })) + '</span>' + (o.tax ? '<span>' + esc(t('sum.gst', { v: NS.money(o.tax) })) + '</span>' : '') +
-        '<span>' + esc(t('fe.s.pay', { v: NS.money(o.payable) })) + '</span><b>' + esc(t('fe.s.paid', { v: NS.money(o.paid) })) + '</b>' + (o.balance > 0 ? '<span class="warn">' + esc(t('fe.s.bal', { v: NS.money(o.balance) })) + '</span>' : '');
+        '<span>' + esc(t('fe.s.pay', { v: NS.money(o.payable) })) + '</span><b>' + esc(t('fe.s.paid', { v: NS.money(o.paid) })) + '</b>' + (o.balance > 0 ? '<span class="warn">' + esc(t('fe.s.bal', { v: NS.money(o.balance) })) + '</span>' : o.balance < 0 ? '<span>' + esc(t('fe.s.adv', { v: NS.money(-o.balance) })) + '</span>' : '');
     },
     validate: function (d, o) {
       var p = [];
@@ -120,7 +123,7 @@
         ['Class', esc(d.cls) + (d.sec ? ' – ' + esc(d.sec) : '')], d.roll ? ['Roll / adm. no.', esc(d.roll)] : null, d.session ? ['Session', esc(d.session)] : null, ['Fee period', esc(period)]];
       var rows = d.lines.filter(function (l) { return l.desc || num(l.amt); });
       var tot = [['Fees', NS.money(o.fees)], o.conc ? ['Concession / scholarship', '−' + NS.money(o.conc)] : null, o.tax && !d.incl ? ['Taxable value', NS.money(o.taxable)] : null,
-        o.tax ? [(d.incl ? 'Includes ' : '') + 'GST 18%', NS.money(o.tax)] : null, o.prev ? ['Previous dues', NS.money(o.prev)] : null, ['Total payable', NS.money(o.payable)], ['Received', NS.money(o.paid), 'grand'], o.balance > 0 ? ['Balance due', NS.money(o.balance)] : null];
+        o.tax ? [(d.incl ? 'Includes ' : '') + 'GST 18%', NS.money(o.tax)] : null, o.prev ? ['Previous dues', NS.money(o.prev)] : null, ['Total payable', NS.money(o.payable)], ['Received', NS.money(o.paid), 'grand'], o.balance > 0 ? ['Balance due', NS.money(o.balance)] : o.balance < 0 ? ['Advance (extra received)', NS.money(-o.balance)] : null];
       var pay = 'Received by ' + ({ cash: 'cash', upi: 'UPI', cheque: 'cheque', bank: 'bank transfer', card: 'card' }[d.mode] || 'other means') + (d.ref ? ' (ref. ' + esc(d.ref) + ')' : '') + '.';
       var gstNote = d.gst === 'ex' ? 'Education services by a school up to higher secondary are exempt from GST.' : d.gst === '18' ? 'SAC 9992. GST charged at 18%.' : '';
       if (/^th/.test(d.paper)) return K.thOpen(d, 'FEE RECEIPT') + (label ? '<p class="copy">' + label + '</p>' : '') + K.kv(meta) + '<table class="tl"><tbody>' + rows.map(function (l) { return '<tr><td class="l">' + esc(l.desc) + '</td><td class="n">' + NS.money(num(l.amt), false) + '</td></tr>'; }).join('') + '</tbody></table>' +
