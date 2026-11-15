@@ -135,7 +135,10 @@
         '<div class="signs">' + K.blankSign('', 'Parent / student') + K.sign(d, '', 'Accountant / authorised signatory') + '</div>' + K.made() + '</div>';
     },
     wire: function (ed) { var b = $('[data-fe="dues"]', ed); if (b) b.addEventListener('click', dues); },
-    ready: function () {
+    ready: function (K) {
+      /* the student fees screen (fees.js) hands a receipt over as ?pre=<json>: student, months, heads, concession, money, and pay lines that match it to the dues */
+      var pre = new URLSearchParams(location.search).get('pre');
+      if (pre) { try { var p = JSON.parse(pre); history.replaceState(null, '', location.pathname + location.hash); K.apply(p); } catch (e) {} }
       if ($('#fe-dues')) return;
       var x = NS.el('dialog', { id: 'fe-dues', 'aria-labelledby': 'fe-dues-h' }, '<div class="dlg-h"><h2 id="fe-dues-h"></h2><button type="button" class="btn sm" data-close></button></div><div class="dlg-b" data-dues></div>');
       document.body.appendChild(x);
