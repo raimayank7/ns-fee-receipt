@@ -50,7 +50,7 @@
   }
 
   K = NS.kit({
-    type: 'fee', prefix: 'FR', digits: 4, paper: 'a5', papers: ['a5', 'a4', 'th80'], copies: 2, copyLabels: ['Student copy', 'Office copy'],
+    type: 'fee', prefix: 'FR', digits: 4, paper: 'a5', papers: NS.PAPER_ALL, copies: 2, copyLabels: ['Student copy', 'Office copy'],
     name: function () { return 'Fee Receipt'; },
     blank: function () { var m = ym(NS.today()); return { cls: '', sec: '', roll: '', guardian: '', session: '', mFrom: m, mTo: m, lines: [line('Tuition fee')], conc: '', prev: '', paid: '', mode: 'cash', ref: '', gst: 'ex', incl: true, balance: 0 }; },
     newRow: function () { return line(); },
