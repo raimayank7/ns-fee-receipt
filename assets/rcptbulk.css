@@ -1,0 +1,17 @@
+/* many receipts at once from Excel (rcptbulk.js, byof2-receipts 28 Nov 2026) */
+.rb-f{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));gap:10px 14px;margin:6px 0 10px}
+.rb-f label,.rb-colgrid label,.rb-msg{display:flex;flex-direction:column;gap:4px;font-size:.9rem;font-weight:600;min-width:0}
+.rb-f input,.rb-f select,.rb-colgrid select{width:100%;min-width:0;min-height:40px}
+.rb-no{display:flex;align-items:center;gap:6px;min-width:0}.rb-no .mono{font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60%}.rb-no input{flex:1;min-width:70px}
+[data-rcptbulk] .chk{display:inline-flex;align-items:center;gap:6px;margin:4px 14px 4px 0;font-size:.92rem;flex-wrap:wrap}
+[data-rcptbulk] .chk select{min-height:36px;max-width:100%}
+.rb-drop{margin-top:10px;padding:18px 12px;border:2px dashed var(--line);border-radius:12px;text-align:center;color:var(--muted,#64748b);cursor:pointer}
+.rb-drop.on,.rb-drop:focus-visible{border-color:var(--accent,#0f766e);background:color-mix(in srgb,var(--accent,#0f766e) 8%,transparent);outline:none}
+.rb-cols{margin:10px 0}.rb-cols summary,[data-rcptbulk] .bk-out details summary{cursor:pointer;font-weight:600;min-height:32px}
+.rb-colgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:8px 12px;margin:8px 0}
+[data-rcptbulk] .bk-out h4{margin:12px 0 4px;font-size:1rem}
+[data-rcptbulk] .bk-t tr.ok,[data-rcptbulk] .bk-t tr.bad{color:inherit;font-weight:400}[data-rcptbulk] .bk-t td:first-child,[data-rcptbulk] .bk-t th:first-child{white-space:nowrap}
+dialog.rb-send{width:min(620px,calc(100vw - 24px));max-height:calc(100vh - 24px);overflow:auto}
+.rb-msg textarea{width:100%;min-height:120px;font:inherit;font-weight:400}
+dialog.rb-send .row{flex-wrap:wrap}
+@media print{[data-rcptbulk],dialog.rb-send{display:none!important}}

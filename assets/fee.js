@@ -147,4 +147,6 @@
       names(); document.addEventListener('ns-lang', names);
     }
   });
+  /* byof2-receipts: the bulk fee receipts screen (rcptbulk.js) */
+  window.NSRcptOut = { kind: 'fee', prefix: 'FR', paper: 'a5', html: function (d, label) { return K.out(d, label); }, next: function (s, d) { return K.nextFor(s, d); }, sums: sums };
 })();
